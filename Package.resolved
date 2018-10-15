@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "BaseAPI",
+        "repositoryURL": "https://github.com/serhii-londar/BaseAPI.git",
+        "state": {
+          "branch": null,
+          "revision": "9b0f0e1104542bab08153dec12f8de1c8a073887",
+          "version": "0.1.2"
+        }
+      },
+      {
+        "package": "GithubAPI",
+        "repositoryURL": "https://github.com/serhii-londar/GithubAPI.git",
+        "state": {
+          "branch": null,
+          "revision": "3b354a068942dddda4a6a2f0fe988ac04ebd7734",
+          "version": "0.0.6"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
