@@ -10,7 +10,7 @@ import GithubAPI
 
 class Markdown {
     func generateMarkdownForRepo(_ repoUrl: String, description: String, language: Language) {
-        let autentification = TokenAuthentication(token: "c7d13ae14eebcfd5b9c70f7d0e925c81a385fd99")
+        let autentification = TokenAuthentication(token: "")
         let components = repoUrl.components(separatedBy: "/")
         guard components.count == 5 else { return }
         let owner = components[3]
