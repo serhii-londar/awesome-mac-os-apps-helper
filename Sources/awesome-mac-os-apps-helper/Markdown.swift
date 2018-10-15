@@ -10,13 +10,12 @@ import GithubAPI
 
 class Markdown {
     func generateMarkdownForRepo(_ repoUrl: String, description: String, language: Language) {
-        let autentification = TokenAuthentication(token: "")
         let components = repoUrl.components(separatedBy: "/")
         guard components.count == 5 else { return }
         let owner = components[3]
         let repo = components[4]
         var line = "- [\(repo)](\(repoUrl) - \(description) ![\(language)]"
-        let response = RepositoriesContentsAPI(authentication: autentification).getReadmeSync(owner: owner, repo: repo)
+        let response = RepositoriesContentsAPI().getReadmeSync(owner: owner, repo: repo)
         let readme = response.0
         guard let readmeContent = readme?.content?.replacingOccurrences(of: "\n", with: "").base64Decoded() else { return }
         let imageLocalUrls = Readme.getLocalImageUrls(readmeContent, owner: owner, repo: repo)
