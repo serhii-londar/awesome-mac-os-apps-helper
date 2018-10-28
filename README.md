@@ -16,7 +16,7 @@ Having checked out the repo, build it through Xcode or by running
 ```
 swift build
 ``` 
-in your terminal. This will create an executable that can be run as:
+in your terminal. This will create an executable (when run in command line, it will be in the default Swift build directory, typically `.build/<architecture>/debug`), and can be run as:
 
 ```
 ./awesome-mac-os-apps-helper --repoUrl 'https://github.com/dbeaver/dbeaver' --description 'Universal database tool and SQL client.' --language 'Java'
