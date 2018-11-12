@@ -130,7 +130,7 @@ class JSONExtraxtor {
             guard components.count == 5 else { continue }
             let owner = components[3]
             let repo = components[4]
-            let response = RepositoriesContentsAPI(authentication: TokenAuthentication(token: "c1a14ffb387f4dea6a9cb3ef8bd058938aecc07e")).getReadmeSync(owner: owner, repo: repo)
+            let response = RepositoriesContentsAPI().getReadmeSync(owner: owner, repo: repo)
             let readme = response.response
             if response.response != nil {
                 sleep(2)
