@@ -43,4 +43,9 @@ func main() {
     }
     Markdown().generateMarkdownForRepo(repositoryURL, description: repositoryDescription, language: lang)
 }
-main()
+
+//main()
+
+//JSONExtraxtor().generateJSON()
+
+ReadmeGenerator().generateReadme()
