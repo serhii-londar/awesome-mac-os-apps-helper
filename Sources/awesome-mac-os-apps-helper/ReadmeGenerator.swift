@@ -190,7 +190,7 @@ class ReadmeGenerator {
         readmeString.append(header)
         
         for category in categories {
-            readmeString.append("\n### \(category.title.capitalized)\n")
+            readmeString.append("\n### \(category.title)\n")
             var categoryApplications = applications.filter({ $0.category == category.id })
             categoryApplications = categoryApplications.sorted(by: { (ap1, ap2) -> Bool in
                 return ap1.title < ap2.title
@@ -220,20 +220,19 @@ class ReadmeGenerator {
                 return sc1.title < sc2.title
             }
             for subcategory in subcategories {
-                readmeString.append("\n#### \(subcategory.title.capitalized)\n")
+                readmeString.append("\n#### \(subcategory.title)\n\n")
                 var categoryApplications = applications.filter({ $0.category == subcategory.id })
                 categoryApplications = categoryApplications.sorted(by: { (ap1, ap2) -> Bool in
                     return ap1.title < ap2.title
                 })
                 
                 for application in categoryApplications {
-                    readmeString.append("\n")
                     var languages: String = ""
                     for lang in application.languages {
                         languages.append("![\(lang)] ")
                     }
                     
-                    readmeString.append("- [\(application.title)](\(application.repoURL)) - \(application.shortDescription)")
+                    readmeString.append("- [\(application.title)](\(application.repoURL)) - \(application.shortDescription) \(languages)")
                     
                     if application.screenshots.count > 0 {
                         var screenshotsString = ""
@@ -243,8 +242,8 @@ class ReadmeGenerator {
                         })
                         screenshotsString += (" " + Constants.detailsEndString + " ")
                         readmeString.append(screenshotsString)
-                        readmeString.append("\n\n")
                     }
+                    readmeString.append("\n")
                 }
                 
             }
