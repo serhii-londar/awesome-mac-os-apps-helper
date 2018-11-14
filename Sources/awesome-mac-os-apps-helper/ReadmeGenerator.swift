@@ -124,6 +124,49 @@ Thanks to all the people who contribute:
 [swift_icon]: ./icons/swift-16.png 'Swift language.'
 [type_script_icon]: ./icons/typescript-16.png 'TypeScript language.'
 """
+class JSONApplications: Codable {
+    let applications: [JSONApplication]
+    
+    enum CodingKeys: String, CodingKey {
+        case applications
+    }
+    
+    init(applications: [JSONApplication]) {
+        self.applications = applications
+    }
+    
+    required public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        applications = try values.decodeIfPresent([JSONApplication].self, forKey: .applications) ?? []
+    }
+}
+
+class JSONApplication: Codable {
+    var title: String
+    var repoURL: String
+    var shortDescription: String
+    var languages: [String]
+    var screenshots: [String]
+    var category: String
+    
+    enum CodingKeys: String, CodingKey {
+        case title
+        case repoURL = "repo_url"
+        case shortDescription = "short_description"
+        case languages
+        case screenshots
+        case category
+    }
+    
+    init(title: String, repoURL: String, shortDescription: String, languages: [String], screenshots: [String], category: String) {
+        self.title = title
+        self.repoURL = repoURL
+        self.shortDescription = shortDescription
+        self.languages = languages
+        self.screenshots = screenshots
+        self.category = category
+    }
+}
 
 class Categories: Codable {
     let categories: [Category]
@@ -148,114 +191,97 @@ class Category: Codable {
         self.description = description
         self.parent = parent
     }
-    
-    required public init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        title = try values.decodeIfPresent(String.self, forKey: .title) ?? ""
-        id = try values.decodeIfPresent(String.self, forKey: .id) ?? ""
-        description = try values.decodeIfPresent(String.self, forKey: .description) ?? ""
-        parent = try values.decodeIfPresent(String.self, forKey: .parent) ?? ""
-    }
 }
 
 class ReadmeGenerator {
-    var readmeString = ""
+    var readmeString = String.empty
     
     func generateReadme() {
-        guard let applicationsData = try? Data(contentsOf: URL(fileURLWithPath: "./applications.json")) else { return }
-        guard let categoriesData = try? Data(contentsOf: URL(fileURLWithPath: "./categories.json")) else { return }
+        guard let applicationsData = try? Data(contentsOf: URL(fileURLWithPath: FilePaths.applications.rawValue)) else { return }
+        guard let categoriesData = try? Data(contentsOf: URL(fileURLWithPath: FilePaths.categories.rawValue)) else { return }
         let jsonDecoder = JSONDecoder()
         guard let applicationsObject = try? jsonDecoder.decode(JSONApplications.self, from: applicationsData) else { return }
         guard let categoriesObject = try? jsonDecoder.decode(Categories.self, from: categoriesData) else { return }
         
-        
         var categories = categoriesObject.categories
-        let allSubcategories = categories.filter({ $0.parent != nil && !$0.parent!.isEmpty })
+        let subcategories = categories.filter({ $0.parent != nil && !$0.parent!.isEmpty })
         var applications = applicationsObject.applications
         
-        for subcategory in allSubcategories {
+        for subcategory in subcategories {
             if let index = categories.lastIndex(where: { $0.parent != subcategory.id }) {
                 categories.remove(at: index)
             }
         }
         
-        categories = categories.sorted { (c1, c2) -> Bool in
-            return c1.title < c2.title
-        }
+        categories = categories.sorted(by: { $0.title < $1.title })
         
-        applications = applications.sorted(by: { (ap1, ap2) -> Bool in
-            return ap1.category < ap2.category
-        })
+        applications = applications.sorted(by: { $0.category < $1.category })
         
         readmeString.append(header)
         
         for category in categories {
-            readmeString.append("\n### \(category.title)\n")
+            readmeString.append(String.enter + String.section + String.space + category.title + String.enter)
             var categoryApplications = applications.filter({ $0.category == category.id })
-            categoryApplications = categoryApplications.sorted(by: { (ap1, ap2) -> Bool in
-                return ap1.title < ap2.title
-            })
+            categoryApplications = categoryApplications.sorted(by: { $0.title < $1.title })
             
             for application in categoryApplications {
-                var languages: String = ""
-                for lang in application.languages {
-                    languages.append("![\(lang)] ")
-                }
-                readmeString.append("- [\(application.title)](\(application.repoURL)) - \(application.shortDescription) \(languages)")
-                if application.screenshots.count > 0 {
-                    var screenshotsString = ""
-                    screenshotsString += (" " + Constants.detailsBeginString + " ")
-                    application.screenshots.forEach({
-                        screenshotsString += (" " + (NSString(format: Constants.srcLinePattern as NSString, $0 as CVarArg) as String) + " ")
-                    })
-                    screenshotsString += (" " + Constants.detailsEndString + " ")
-                    readmeString.append(screenshotsString)
-                }
-                readmeString.append("\n")
+                readmeString.append(application.markdownDescription())
+                readmeString.append(String.enter)
             }
             
-            var subcategories = allSubcategories.filter({ $0.parent == category.id })
+            var subcategories = subcategories.filter({ $0.parent == category.id })
             guard subcategories.count > 0 else { continue }
-            subcategories = subcategories.sorted { (sc1, sc2) -> Bool in
-                return sc1.title < sc2.title
-            }
+            subcategories = subcategories.sorted(by: { $0.title < $1.title })
             for subcategory in subcategories {
-                readmeString.append("\n#### \(subcategory.title)\n\n")
+                readmeString.append(String.enter + String.subsection + String.space + subcategory.title + String.enter)
                 var categoryApplications = applications.filter({ $0.category == subcategory.id })
-                categoryApplications = categoryApplications.sorted(by: { (ap1, ap2) -> Bool in
-                    return ap1.title < ap2.title
-                })
+                categoryApplications = categoryApplications.sorted(by: { $0.title < $1.title })
                 
                 for application in categoryApplications {
-                    var languages: String = ""
-                    for lang in application.languages {
-                        languages.append("![\(lang)] ")
-                    }
-                    
-                    readmeString.append("- [\(application.title)](\(application.repoURL)) - \(application.shortDescription) \(languages)")
-                    
-                    if application.screenshots.count > 0 {
-                        var screenshotsString = ""
-                        screenshotsString += (" " + Constants.detailsBeginString + " ")
-                        application.screenshots.forEach({
-                            readmeString += (" " + (NSString(format: Constants.srcLinePattern as NSString, $0 as CVarArg) as String) + " ")
-                        })
-                        screenshotsString += (" " + Constants.detailsEndString + " ")
-                        readmeString.append(screenshotsString)
-                    }
-                    readmeString.append("\n")
+                    readmeString.append(application.markdownDescription())
+                    readmeString.append(String.enter)
                 }
-                
             }
         }
-        
-        
         readmeString.append(footer)
-        print(readmeString)
-
-        try? readmeString.data(using: .utf8)?.write(to: URL(fileURLWithPath: "./NEWREADME.md"))
-        print("!!!!!FINISHED!!!!!")
+        try? readmeString.data(using: .utf8)?.write(to: URL(fileURLWithPath: FilePaths.newReadme.rawValue))
     }
 }
 
+extension String {
+    static let empty = ""
+    static let space = " "
+    static let enter = "\n"
+    static let section = "###"
+    static let subsection = "####"
+}
 
+extension JSONApplication {
+    func markdownDescription() -> String {
+        var markdownDescription = String.empty
+        var languages: String = String.empty
+        for lang in self.languages {
+            languages.append("![\(lang)] ")
+        }
+        
+        markdownDescription.append("- [\(self.title)](\(self.repoURL)) - \(self.shortDescription) \(languages)")
+        
+        if self.screenshots.count > 0 {
+            var screenshotsString = String.empty
+            screenshotsString += (String.space + Constants.detailsBeginString + String.space)
+            self.screenshots.forEach({
+                screenshotsString += (String.space + (NSString(format: Constants.srcLinePattern as NSString, $0 as CVarArg) as String) + String.space)
+            })
+            screenshotsString += (String.space + Constants.detailsEndString + String.space)
+            markdownDescription.append(screenshotsString)
+        }
+        return markdownDescription
+    }
+}
+
+enum FilePaths: String {
+    case readme = "./README.md"
+    case newReadme = "./NEWREADME.md"
+    case applications = "./applications.json"
+    case categories = "./categories.json"
+}
