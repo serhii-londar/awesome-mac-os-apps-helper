@@ -48,4 +48,6 @@ func main() {
 
 //JSONExtraxtor().generateJSON()
 
-ReadmeGenerator().generateReadme()
+//ReadmeGenerator().generateReadme()
+
+ApplicationsHelper().removeLanguageDuplications()

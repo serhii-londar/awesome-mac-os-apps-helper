@@ -18,12 +18,12 @@ class JSONExtraxtor {
         var subcategory: String? = nil
         var applications = [JSONApplication]()
         for line in lines {
-            if line.contains("####") {
-                subcategory = line.replacingOccurrences(of: "#### ", with: "").lowercased()
+            if line.contains(String.subsection) {
+                subcategory = line.replacingOccurrences(of: String.subsection, with: "").replacingOccurrences(of: String.space, with: "-").replacingOccurrences(of: "&", with: "").replacingOccurrences(of: "/", with: "").lowercased()
                 continue
             }
-            if line.contains("###") {
-                category = line.replacingOccurrences(of: "### ", with: "").lowercased()
+            if line.contains(String.section) {
+                category = line.replacingOccurrences(of: String.section, with: "").replacingOccurrences(of: String.space, with: "-").replacingOccurrences(of: "&", with: "").replacingOccurrences(of: "/", with: "").lowercased()
                 subcategory = nil
                 continue
             }
@@ -59,8 +59,10 @@ class JSONExtraxtor {
                 let applicationCategory = subcategory ?? category
                 let application = JSONApplication(title: title, repoURL: repoURL, shortDescription: shortDescription, languages: languagesArray, screenshots: imageUrls, category: applicationCategory)
                 applications.append(application)
-            }
-        }
+			} else {
+				print(line)
+			}
+		}
         for application in applications {
             guard application.screenshots.count == 0 else { continue }
             
